@@ -5,26 +5,20 @@ export default class UsersList extends React.Component{
         super(props);
         this.state = {
             loading: false,
-            users: []
         }
     }
 
     componentDidMount(){
         // get all users in the database //
-        let url = "https://applistage.herokuapp.com/users/";
-        fetch(url)
-            .then((data) => {
-                return data.json()
-            }).then((res) => {
-                console.log(res);
-                this.setState({
-                    loading: false,
-                    users: res
-                });
-            });
     }
 
     render(){
+        const clientsList = props.users.map((client) => {
+            <div id='client'>
+
+            </div>
+        });
+
         return (
             <div className="users">
                 <ul>

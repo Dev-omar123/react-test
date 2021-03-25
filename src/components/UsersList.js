@@ -13,12 +13,12 @@ export default class UsersList extends React.Component{
     }
 
     render(){
-        const clientsItems = this.props.users.map((client) => 
-            <li className="client" key={client.id} onClick={(e) => { this.props.clientClicked(client.id)}}>
-                <p>{client.nom} {client.prenom}</p>
+        const clientsItems = this.props.users.map((client, index) => 
+            <li className="client" key={client.id}>
+                <p onClick={(e) => this.props.clientClicked(client.id, index)}>{client.nom} {client.prenom}</p>
                 <div>
-                    <button onClick={this.props.editClient} className="edit_btn">edit</button>
-                    <button onClick={this.props.deleteClient} className="delete_btn">edit</button>
+                    <button onClick={(e) => this.props.editClient(client.id, index)} className="edit_btn">edit client</button>
+                    <button onClick={(e) => this.props.deleteClient(client.id, index)} className="delete_btn">delete</button>
                 </div>
             </li>
         );

@@ -3,6 +3,7 @@ import './App.css';
 import React from "react";
 import UserForm from './components/UserForm';
 import UsersList from './components/UsersList';
+import ClientDetails from './components/ClientDetails';
 
 class  App extends React.Component {
   	constructor(props) {
@@ -13,7 +14,8 @@ class  App extends React.Component {
 			showclient: false,
 			users: [],
 			selectedClientId: null,
-			showForm: false
+			showForm: false,
+			showingDetailPage: false
 		}
 		this.getClients = this.getClients.bind(this);
 		this.getClientById = this.getClientById.bind(this);
@@ -21,6 +23,8 @@ class  App extends React.Component {
 		this.removeClient = this.removeClient.bind(this);
 		this.showDetailPage = this.showDetailPage.bind(this);
 		this.toggleShowForm = this.toggleShowForm.bind(this);
+		this.toggleShowDetailPage = this.toggleShowDetailPage.bind(this);
+		this.editClient = this.editClient.bind(this);
   	}
    
   	componentDidMount () {
@@ -64,10 +68,10 @@ class  App extends React.Component {
 		})
 	}
 
-	showDetailPage(id){
+	showDetailPage(id, index){
 		this.setState({
-			showDetailPage: true,
-			selectedClientId: id
+			showingDetailPage: true,
+			selectedClientId: index
 		});
 	}
 	
@@ -77,10 +81,9 @@ class  App extends React.Component {
 
 		}).then((response) => response.json())
 		.then((response) => {
-
+			
 		});
 	}
-
 
     toggleShowForm(){
 		this.setState({
@@ -88,28 +91,54 @@ class  App extends React.Component {
 		});
     }
 
+	editClient(index){
+		let client = this.state.users[index];
+		if(client){
+			this.setState({
+				selectedClientId: client.id
+			});
+		}
+	}
+
+	toggleShowDetailPage(e){
+		e.preventDefault();
+		this.setState({
+			showingDetailPage: !this.state.showingDetailPage
+		})
+	}
+
 	render(){
-		if(this.state.showDetailPage){
-			return (
-				<div>
-					<h4>Client Detail</h4>
+		let index = this.state.selectedClientId;
+		let detailpage = (
+			<div>
+				<button onClick={this.toggleShowDetailPage}>Close page</button>
+				<ClientDetails infos={this.state.users[index]} />
+			</div>
+		);
+		let defaultpage = (
+			<div>
+				<UsersList 
+					users={this.state.users} 
+					clientClicked={this.showDetailPage}
+					deleteClient={this.removeClient}
+					editClient={this.editClient}
+				/>
+				<UserForm show={this.state.showForm} selectedClient={this.selectedClientId}/>
+			</div>
+		);
+	
+		return (
+			<div id="app">
+				<h1 className="app_title">Clients database App</h1>
+				<hr/>
+				<div className="formList">
+					<button onClick={this.toggleShowForm}>
+						{this.state.showForm ? "Fermer" : "Ajouter un Client"}
+					</button>
+					{this.state.showingDetailPage ? detailpage : defaultpage}
 				</div>
-			)
-		}
-		else{
-			return (
-				<div id="app">
-					<h1 className="app_title">Clients database App</h1>
-					<div className="formList">
-						<button onClick={this.toggleShowForm}>
-							{ this.state.showForm ? "Close Form" : "Show Form"}
-						</button>
-						<UsersList users={this.state.users} clientClicked={this.showDetailPage}/>
-						<UserForm show={this.state.showForm}/>
-					</div>
-				</div>
-			);
-		}
+			</div>
+		);
 	}
 }
 

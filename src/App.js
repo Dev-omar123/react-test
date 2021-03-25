@@ -11,12 +11,16 @@ class  App extends React.Component {
 		this.state = {
 			loading: true,
 			showclient: false,
-			users: []
+			users: [],
+			selectedClientId: null,
+			showForm: false
 		}
 		this.getClients = this.getClients.bind(this);
 		this.getClientById = this.getClientById.bind(this);
 		this.updateClient = this.updateClient.bind(this);
 		this.removeClient = this.removeClient.bind(this);
+		this.showDetailPage = this.showDetailPage.bind(this);
+		this.toggleShowForm = this.toggleShowForm.bind(this);
   	}
    
   	componentDidMount () {
@@ -61,24 +65,51 @@ class  App extends React.Component {
 	}
 
 	showDetailPage(id){
-		
+		this.setState({
+			showDetailPage: true,
+			selectedClientId: id
+		});
 	}
 	
 	removeClient(id){
 		let endpoint = this.api+"/users/"+id;
+		fetch(endpoint, {
+
+		}).then((response) => response.json())
+		.then((response) => {
+
+		});
 	}
 
+
+    toggleShowForm(){
+		this.setState({
+			showForm: !this.state.showForm
+		});
+    }
+
 	render(){
-		return (
-			<div>
-				<h1>Clients database App</h1>
-				<div className="form_list">
-					<UsersList users={this.state.users} />
-					<UserForm/>
+		if(this.state.showDetailPage){
+			return (
+				<div>
+					<h4>Client Detail</h4>
 				</div>
-				
-			</div>
-		);
+			)
+		}
+		else{
+			return (
+				<div id="app">
+					<h1 className="app_title">Clients database App</h1>
+					<div className="formList">
+						<button onClick={this.toggleShowForm}>
+							{ this.state.showForm ? "Close Form" : "Show Form"}
+						</button>
+						<UsersList users={this.state.users} clientClicked={this.showDetailPage}/>
+						<UserForm show={this.state.showForm}/>
+					</div>
+				</div>
+			);
+		}
 	}
 }
 

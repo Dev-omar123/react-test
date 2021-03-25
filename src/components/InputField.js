@@ -5,6 +5,7 @@ const InputField = (props) => {
             <div>
                 <input id={props.name} type={props.inputType} 
                     name={props.name}
+                    value={props.value}
                     placeholder={props.inputPlaceholder}
                     onChange={(e) => props.onChange({   
                         value: props.inputType === "number" ? parseInt(e.target.value) : e.target.value,
@@ -21,6 +22,7 @@ InputField.defaultProps = {
     className: "input",
     label: "",
     inputType: "",
+    value: "",
     onChange: (data) => { console.log(data); }
 }
 

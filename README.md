@@ -3,7 +3,7 @@
 ## How to compile and run the project
 
 1. install nodejs and npm
-2. close this repository
+2. clone this github repository
 3. run these following commands in your terminal (one by one):
 ```
 $ npm install

@@ -1,145 +1,163 @@
-//import logo from './logo.svg';
+import React from 'react';
+import ClientsListPage from './components/pages/ClientsList';
+import ClientsCreatePage from './components/pages/ClientCreate';
+import ClientsDetailsPage from './components/pages/ClientDetails';
+import ClientsUpdatePage from './components/pages/ClientUpdate';
+
+import './reset.css';
 import './App.css';
-import React from "react";
-import UserForm from './components/UserForm';
-import UsersList from './components/UsersList';
-import ClientDetails from './components/ClientDetails';
 
-class  App extends React.Component {
-  	constructor(props) {
-    	super(props);
-		this.api = "https://applistage.herokuapp.com/api";
+export default class App extends React.Component{
+	constructor(props){
+		super(props);
+		this.api = "https://applistage.herokuapp.com/api/users";
 		this.state = {
-			loading: true,
-			showclient: false,
-			users: [],
-			selectedClientId: null,
-			showForm: false,
-			showingDetailPage: false
+			currentPage: "home",
+			clients: [],
+			client: {}
 		}
+		this.showHomepage = this.showHomepage.bind(this);
+		this.changePage = this.changePage.bind(this);
 		this.getClients = this.getClients.bind(this);
-		this.getClientById = this.getClientById.bind(this);
-		this.updateClient = this.updateClient.bind(this);
-		this.removeClient = this.removeClient.bind(this);
-		this.showDetailPage = this.showDetailPage.bind(this);
-		this.toggleShowForm = this.toggleShowForm.bind(this);
-		this.toggleShowDetailPage = this.toggleShowDetailPage.bind(this);
-		this.editClient = this.editClient.bind(this);
-  	}
-   
-  	componentDidMount () {
-    	// récupère toutes les entités - GET
-	  	this.getClients();
+		this.onClientCreated = this.onClientCreated.bind(this);
+		this.onClientUpdated = this.onClientUpdated.bind(this);
+		this.onClientDeleted = this.onClientDeleted.bind(this);
+		this.showClientCreatePage = this.showClientCreatePage.bind(this); 
+		this.showClientDetail = this.showClientDetail.bind(this);
+		this.selectClient = this.selectClient.bind(this);
+		this.onClientFieldChange = this.onClientFieldChange.bind(this);
 	}
-	
+
+	componentDidMount(){
+		this.getClients();
+	}
+
 	getClients(){
-		let endpoint = this.api+"/users/";
-		fetch(endpoint, {
-			method: 'GET'
-		}).then((data) => {
-			return data.json()
-		}).then((response) => {
-			this.setState({
-				loading: false,
-				users: response.users
-			})
-		})
+		fetch(this.api)
+			.then((res) => res.json())
+			.then((res) => {
+				if(res.status === "ok"){
+					this.setState({
+						clients: res.users,
+						client: {}
+					});
+				}
+			});
 	}
 
-	getClientById(id){
-		let endpoint = this.api+"/users/"+id;
-		fetch(endpoint, {
-			method: 'GET'
-		}).then((data) => {
-			return data;
-		}).then((response) => {
-			console.log("response", response);
-		})
-	}
-	
-	updateClient(data){
-		let endpoint = this.api+"/users/";
-		fetch(endpoint, {
-
-		}).then((data) => {
-			return data
-		}).then((response) => {
-			console.log(response);
-		})
+	showHomepage(){
+		if(this.state.currentPage !== "home"){
+			this.changePage("home");
+		}
 	}
 
-	showDetailPage(id, index){
+	changePage(page){
 		this.setState({
-			showingDetailPage: true,
-			selectedClientId: index
-		});
-	}
-	
-	removeClient(id){
-		let endpoint = this.api+"/users/"+id;
-		fetch(endpoint, {
-
-		}).then((response) => response.json())
-		.then((response) => {
-			
+			currentPage: page
 		});
 	}
 
-    toggleShowForm(){
+	showClientDetail(client){
+		let currentClient = Object.assign({}, client);
 		this.setState({
-			showForm: !this.state.showForm
+			client: currentClient
 		});
-    }
+		this.changePage("details");
+	}
 
-	editClient(index){
-		let client = this.state.users[index];
+	onClientCreated(){
+		alert("Client account created successfully! ");
+		this.changePage("home");
+		this.getClients();
+	}
+
+	onClientUpdated(){
+		alert("Client account updated successfully! ");
+		this.changePage("home");
+		this.getClients();
+	}
+
+	onClientDeleted(){
+		alert("Client account deleted !");
+		this.changePage("home");
+		this.getClients();
+	}
+
+	showClientCreatePage(e){
+		e.preventDefault();
+		this.changePage("create");
+	}
+
+	onClientFieldChange(e){
+		let client = Object.assign({}, this.state.client);
+		let key = e.target.name;
+		let value = e.target.value;
+		client[key] = value;
+		this.setState({
+			client: client
+		})
+	}
+
+	selectClient(data){
+		let client = Object.assign({}, data);
 		if(client){
 			this.setState({
-				selectedClientId: client.id
+				client: client
 			});
 		}
 	}
 
-	toggleShowDetailPage(e){
-		e.preventDefault();
-		this.setState({
-			showingDetailPage: !this.state.showingDetailPage
-		})
-	}
-
 	render(){
-		let index = this.state.selectedClientId;
-		let detailpage = (
-			<div>
-				<button onClick={this.toggleShowDetailPage}>Close page</button>
-				<ClientDetails infos={this.state.users[index]} />
-			</div>
-		);
-		let defaultpage = (
-			<div>
-				<UsersList 
-					users={this.state.users} 
-					clientClicked={this.showDetailPage}
-					deleteClient={this.removeClient}
-					editClient={this.editClient}
-				/>
-				<UserForm show={this.state.showForm} selectedClient={this.selectedClientId}/>
-			</div>
-		);
-	
+		let page = null
+		switch (this.state.currentPage) {
+			case "home":
+				page = (
+					<ClientsListPage 
+						clients={this.state.clients} 
+						showClientDetail={this.showClientDetail}
+						onClientDeleted={this.onClientDeleted}
+						onClientClick={this.editPage}
+						changePage={this.changePage}
+						selectClient={this.selectClient}
+						showClientPage={this.showClientDetail}/>
+				);
+				break;
+			case "details":
+				page = (
+					<ClientsDetailsPage 
+						client={this.state.client} 
+						changePage={this.changePage}/>
+					);
+				break;
+			case "create":
+				page = <ClientsCreatePage onClientCreated={this.onClientCreated} changePage={this.changePage}/>;
+				break;
+			case "edit":
+				page = (
+					<ClientsUpdatePage 
+						client={this.state.client}
+						onClientUpdated={this.onClientUpdated}
+						changePage={this.changePage}
+						onClientFieldChange={this.onClientFieldChange}/>
+						);
+				break;
+			default:
+				break;
+		}
+		
+
 		return (
 			<div id="app">
-				<h1 className="app_title">Clients database App</h1>
-				<hr/>
-				<div className="formList">
-					<button onClick={this.toggleShowForm}>
-						{this.state.showForm ? "Fermer" : "Ajouter un Client"}
-					</button>
-					{this.state.showingDetailPage ? detailpage : defaultpage}
+				<div id="apptitle">
+					<h5>Clients database App</h5>
+				</div>
+				<div id="controls">
+					<button onClick={this.showClientCreatePage}>Ajouter un client</button>
+				</div>
+				<div>
+					{page}
 				</div>
 			</div>
 		);
 	}
 }
-
-export default App;
